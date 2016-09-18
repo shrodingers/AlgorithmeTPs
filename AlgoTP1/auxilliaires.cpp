@@ -55,9 +55,9 @@ static inline tm& getLocalTime() {
 Date::Date()
 {
     tm local_tm = getLocalTime();
-    m_an = reinterpret_cast<unsigned int>(local_tm.tm_year);
-    m_mois = reinterpret_cast<unsigned int>(local_tm.tm_mon);
-    m_jour = reinterpret_cast<unsigned int>(local_tm.tm_mday);
+    m_an = static_cast<unsigned int>(local_tm.tm_year);
+    m_mois = static_cast<unsigned int>(local_tm.tm_mon);
+    m_jour = static_cast<unsigned int>(local_tm.tm_mday);
 }
 
 Date::Date(unsigned int an, unsigned int mois, unsigned int jour)
@@ -78,16 +78,16 @@ bool Date::operator>(const Date &other) const {
     return std::tie(m_an, m_mois, m_jour) > std::tie(other.m_an, other.m_mois, other.m_jour);
 }
 
-friend std::ostream & Date::operator<<(std::ostream &flux, const Date &p_date) {
-    flux << 'Dates printing not implemented yet';
+std::ostream & operator<<(std::ostream & flux, const Date & p_date) {
+    flux << "Dates printing not implemented yet";
     return flux;
 }
 
 Heure::Heure() {
     tm local_tm = getLocalTime();
-    m_heure = reinterpret_cast<unsigned int>(local_tm.tm_hour);
-    m_min = reinterpret_cast<unsigned int>(local_tm.tm_min);
-    m_sec = reinterpret_cast<unsigned int>(local_tm.tm_sec);
+    m_heure = static_cast<unsigned int>(local_tm.tm_hour);
+    m_min = static_cast<unsigned int>(local_tm.tm_min);
+    m_sec = static_cast<unsigned int>(local_tm.tm_sec);
 }
 
 Heure::Heure(unsigned int heure, unsigned int min, unsigned int sec)
@@ -131,8 +131,8 @@ int Heure::operator-(const Heure &other) const {
     return (m_heure * 3600 + m_min * 60 + m_sec) - (other.m_heure * 3600 + other.m_min * 60 + other.m_sec);
 }
 
-friend std::ostream & operator<<(std::ostream & flux, const Heure & p_heure) {
-    flux << 'Hours printing not implemented yet';
+std::ostream & operator<<(std::ostream & flux, const Heure & p_heure) {
+    flux << "Hours printing not implemented yet";
     return flux;
 }
 
