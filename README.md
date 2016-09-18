@@ -2,7 +2,7 @@
 Tps for Ulaval university
 
 # Guidelines
-Always push to a specific branch, and the pr into master
+Always push to a specific branch, and then pr into master
 
 Please use meaningful commit messages and branches names
 
