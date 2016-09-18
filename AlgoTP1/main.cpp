@@ -12,9 +12,4 @@ int main(int argc, char **argv) {
     std::vector< std::vector<std::string> > results;
 
     lireFichier(argv[1], results, ',', true);
-    for (auto& line : results) {
-        for (auto& token : line) {
-            std::cout << token << std::endl;
-        }
-    }
 }
