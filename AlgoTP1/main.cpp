@@ -3,6 +3,7 @@
 //
 
 #include "Enonce/auxiliaires.h"
+#include "Enonce/arret.h"
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -12,4 +13,8 @@ int main(int argc, char **argv) {
     std::vector< std::vector<std::string> > results;
 
     lireFichier(argv[1], results, ',', true);
+    for(auto& line : results) {
+        Arret test(line);
+        std::cout << test;
+    }
 }
