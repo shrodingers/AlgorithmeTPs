@@ -4,6 +4,7 @@
 
 #include "Enonce/auxiliaires.h"
 #include "Enonce/arret.h"
+#include "Enonce/ligne.h"
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -14,7 +15,7 @@ int main(int argc, char **argv) {
 
     lireFichier(argv[1], results, ',', true);
     for(auto& line : results) {
-        Arret test(line);
+        Ligne test(line);
         std::cout << test;
     }
 }
