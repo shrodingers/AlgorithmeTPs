@@ -2,7 +2,7 @@
 #include <math.h>
 #include "Enonce/coordonnees.h"
 
-Coordonnees::Coordonnees(double latitude, double longitude)
+Coordonnees::Coordonnees(double latitude, double longitude) : m_latitude(0), m_longitude(0)
 {
 	if (!Coordonnees::is_valide_coord(latitude, longitude))
 		return ;
