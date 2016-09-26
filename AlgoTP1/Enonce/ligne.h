@@ -7,6 +7,8 @@
 
 #include <string>
 #include <vector>
+#include <list>
+#include <functional>
 #include "voyage.h"
 #include "station.h"
 #include "auxiliaires.h"
@@ -16,7 +18,7 @@
  * \brief Représente les différentes catégories de bus
  *
  */
-enum class CategorieBus {METRO_BUS, LEBUS, EXPRESS, COUCHE_TARD};
+enum  CategorieBus {METRO_BUS, LEBUS, EXPRESS, COUCHE_TARD};
 
 class Voyage;
 
@@ -30,6 +32,13 @@ class Voyage;
 class Ligne {
 
 private:
+    static constexpr int routeIdIndex = 0;
+    static constexpr int routeShortNameIndex = 2;
+    static constexpr int routeDescIndex = 4;
+    static constexpr int routeColorIndex = 7;
+    static constexpr CategorieBus nullCategory = static_cast<CategorieBus>(-1);
+    static const std::list<std::function< int(std::string const&) > > CategoryTester;
+    static const std::string colorCorresp[];
     unsigned int m_id;
     std::string m_numero;
     std::string m_description;
@@ -37,22 +46,22 @@ private:
     std::vector<Voyage*> m_voyages;
 
 public:
-	Ligne(const std::vector<std::string>& ligne_gtfs);
-	static CategorieBus couleurToCategorie(std::string couleur);
-	static std::string categorieToString(CategorieBus c);
-	CategorieBus getCategorie() const;
-	void setCategorie(CategorieBus categorie);
-	std::pair<std::string, std::string> getDestinations() const;
-	unsigned int getId() const;
-	void setId(unsigned int id);
-	const std::string& getNumero() const;
-	void setNumero(const std::string& numero);
-	const std::vector<Voyage*>& getVoyages() const;
-	void setVoyages(const std::vector<Voyage*>& voyages);
-	void addVoyage(Voyage* ptr_voyage);
-	const std::string& getDescription() const;
-	void setDescription(const std::string& description);
-	friend std::ostream& operator <<(std::ostream& f, const Ligne& p_ligne);
+    Ligne(const std::vector<std::string>& ligne_gtfs);
+    static CategorieBus couleurToCategorie(std::string couleur);
+    static std::string categorieToString(CategorieBus c);
+    CategorieBus getCategorie() const;
+    void setCategorie(CategorieBus categorie);
+    std::pair<std::string, std::string> getDestinations() const;
+    unsigned int getId() const;
+    void setId(unsigned int id);
+    const std::string& getNumero() const;
+    void setNumero(const std::string& numero);
+    const std::vector<Voyage*>& getVoyages() const;
+    void setVoyages(const std::vector<Voyage*>& voyages);
+    void addVoyage(Voyage* ptr_voyage);
+    const std::string& getDescription() const;
+    void setDescription(const std::string& description);
+    friend std::ostream& operator <<(std::ostream& f, const Ligne& p_ligne);
 };
 
 

@@ -41,6 +41,10 @@ public:
 	friend std::ostream & operator<<(std::ostream & flux, const Voyage & p_voyage);
 
 private:
+    static constexpr int serviceIdIndex = 1;
+    static constexpr int tripIdIndex = 2;
+    static constexpr int tripHeadsignIndex = 3;
+
 	std::string m_id;
 	Ligne* m_ligne;
 	std::string m_service_id;

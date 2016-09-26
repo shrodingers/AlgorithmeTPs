@@ -7,6 +7,7 @@
 #include <limits>
 #include <tuple>
 #include <chrono>
+#include <iomanip>
 #include "Enonce/auxiliaires.h"
 
 std::vector<std::string> split(const std::string &s, char delim)
@@ -132,7 +133,9 @@ int Heure::operator-(const Heure &other) const {
 }
 
 std::ostream & operator<<(std::ostream & flux, const Heure & p_heure) {
-    flux << "Hours printing not implemented yet";
+    flux << std::setfill('0') << std::setw(2) << p_heure.m_heure << ':'
+         << std::setfill('0') << std::setw(2) << p_heure.m_min << ':'
+         << std::setfill('0') << std::setw(2)<< p_heure.m_sec;
     return flux;
 }
 

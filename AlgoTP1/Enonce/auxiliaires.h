@@ -77,5 +77,44 @@ private:
 	unsigned int m_sec;
 };
 
+namespace StringConverter {
+    template <typename Type>
+    static Type fromString(std::string const& str) {
+        std::stringstream ss;
+        Type ret;
+
+        ss << str;
+        ss >> ret;
+        return ret;
+    }
+
+    template <>
+    int fromString<int>(std::string const& str) {
+        return std::stoi(str);
+    }
+
+    template <>
+    unsigned int fromString<unsigned int>(std::string const& str) {
+        return std::stoul(str);
+    }
+
+    template <>
+    unsigned long fromString<unsigned long>(std::string const& str) {
+        return std::stoul(str);
+    }
+
+    template <>
+    long fromString<long>(std::string const& str) {
+        return std::stol(str);
+    }
+
+    template <typename Type>
+    static std::string toString(Type const& convert) {
+        std::stringstream ss;
+
+        ss << convert;
+        return ss.str();
+    }
+};
 
 #endif //RTC_AUXILIAIRES_H
