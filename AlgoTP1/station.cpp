@@ -1,7 +1,9 @@
 #include "Enonce/station.h"
 
-Station::Station(const std::vector<std::string>& ligne_gtfs) : m_id(stoi(ligne_gtfs.at(0))), m_nom(ligne_gtfs.at(1)),
-																m_description(ligne_gtfs.at(2)), m_coords(Coordonnees(stod(ligne_gtfs.at(3)), stod(ligne_gtfs.at(4))))
+Station::Station(const std::vector<std::string>& ligne_gtfs) :	m_id(stoi(ligne_gtfs.at(0))),
+																m_nom(ligne_gtfs.at(1)),
+																m_description(ligne_gtfs.at(2)),
+																m_coords(Coordonnees(stod(ligne_gtfs.at(3)), stod(ligne_gtfs.at(4))))
 {
 }
 
