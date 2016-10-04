@@ -7,7 +7,7 @@ Station::Station(const std::vector<std::string>& ligne_gtfs) : m_id(stoi(ligne_g
 
 std::ostream & operator<<(std::ostream & flux, const Station & p_station)
 {
-	flux << p_station.getId() << " : " << p_station.getNom() << " : " << p_station.getDescription() << " :" << p_station.getCoords();
+	flux << p_station.getId() << " - " << p_station.getNom();
 	return (flux);
 }
 
@@ -34,11 +34,18 @@ void Station::setDescription(const std::string& description)
 std::vector<Ligne*> Station::getLignesPassantes() const
 {
 	std::vector<Ligne*> lignes_passantes;
+	bool is_in_list = false;
 
-	for (std::vector<Voyage *>::const_iterator i = m_voyages_passants.begin(); i != m_voyages_passants.end(); ++i)
+	for (auto v : m_voyages_passants)
 	{
-		lignes_passantes.push_back((*i)->getLigne());
+		is_in_list = false;
+		for (auto l : lignes_passantes)
+			if (v->getLigne()->getId() == l->getId())
+				is_in_list = true;
+		if (is_in_list == false)
+			lignes_passantes.push_back(v->getLigne());			
 	}
+
 	return (lignes_passantes);
 }
 
