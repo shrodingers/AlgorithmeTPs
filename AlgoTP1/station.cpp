@@ -45,7 +45,7 @@ std::vector<Ligne*> Station::getLignesPassantes() const
 		for (auto & l : lignes_passantes)
 			if (v->getLigne()->getId() == l->getId())
 				is_in_list = true;
-		if (is_in_list == false)
+		if (!is_in_list)
 			lignes_passantes.push_back(v->getLigne());			
 	}
 
