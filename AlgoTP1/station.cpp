@@ -43,8 +43,10 @@ std::vector<Ligne*> Station::getLignesPassantes() const
     {
         is_in_list = false;
         for (auto & l : lignes_passantes)
-            if (v->getLigne()->getId() == l->getId())
+            if (v->getLigne()->getId() == l->getId()) {
                 is_in_list = true;
+                break;
+            }
         if (!is_in_list)
             lignes_passantes.push_back(v->getLigne());
     }
