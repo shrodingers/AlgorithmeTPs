@@ -10,6 +10,6 @@ set(SOURCE_FILES
         Enonce/ligne.h
         Enonce/station.h
         Enonce/voyage.h
-    arret.h main.cpp auxilliaires.cpp arret.cpp ligne.cpp Voyage.cpp)
+    arret.h main.cpp auxilliaires.cpp arret.cpp ligne.cpp station.cpp Voyage.cpp)
 
 add_executable(AlgoTP1 ${SOURCE_FILES})
