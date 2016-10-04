@@ -51,15 +51,19 @@ int main(int argc, char **argv) {
     std::cout << "Chargement des données terminé en " << duration.count() << "secondes" << std::endl;
 
     const auto& lexCmp = [] (std::string const& s1, std::string const& s2) {
-        return std::lexicographical_compare(s1.begin(), s1.end(), s2.begin(), s2.end(), [&s1, &s2] (char c1, char c2){
-            return s1.length() < s2.length() || c1 < c2;
-        });
+        const auto& countNumbers = [] (std::string const& str) {
+            return std::count_if(str.begin(), str.end(), [] (char c) {
+                return std::isdigit(c);
+            });
+        };
+        return countNumbers(s1) == countNumbers(s2)
+               ? std::lexicographical_compare(s1.begin(), s1.end(), s2.begin(), s2.end())
+               : countNumbers(s1) < countNumbers(s2);
     };
+    const std::string* max = nullptr;
+    const std::string* min = nullptr;
 
     for (auto& elem: lines) {
-        const std::string* max = nullptr;
-        const std::string* min = nullptr;
-
         if (orderedLines.empty()) {
             orderedLines.push_back(elem.second);
             max = &(elem.second->getNumero());
@@ -72,12 +76,13 @@ int main(int argc, char **argv) {
             max = &(elem.second->getNumero());
         } else {
             for (std::list<Ligne*>::iterator it = orderedLines.begin(); it != orderedLines.end(); ++it) {
-                if (!lexCmp(elem.second->getNumero(), (*it)->getNumero())) {
+                if (lexCmp(elem.second->getNumero(), (*it)->getNumero())) {
                     orderedLines.insert(it, elem.second);
                     break;
                 }
             }
         }
+        std::cout << orderedLines.front()->getNumero() << std::endl;
     };
 
     std::ofstream os;
@@ -93,5 +98,6 @@ int main(int argc, char **argv) {
     for (auto& elem: orderedLines) {
         os << *elem;
     }
+    
     return 0;
 }
