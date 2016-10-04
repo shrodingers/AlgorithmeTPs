@@ -12,6 +12,13 @@ const std::list<std::function< int(std::string const&) > > Ligne::CategoryTester
         [] (std::string const& str) { return str == "1A171B" || str == "003888" ? CategorieBus::COUCHE_TARD : nullCategory; }
 };
 
+const std::string Ligne::nameCorres[] = {
+        "METRO_BUS",
+        "LEBUS",
+        "EXPRESS",
+        "COUCHE_TARD"
+};
+
 const std::string Ligne::colorCorresp[]  = {
         "97BF0D", "013888", "E04503", "1A171B"
 };
@@ -97,10 +104,9 @@ void Ligne::addVoyage(Voyage *ptr_voyage) {
 }
 
 std::ostream& operator <<(std::ostream& f, const Ligne& p_ligne) {
-    std::string tmp = p_ligne.m_numero;
-    tmp.erase(std::remove(tmp.begin(), tmp.end(), '\"'), tmp.end());
-    f << p_ligne.m_id << ',' << "RTC" << ',' << p_ligne.m_numero << ',' << "" << ',' << p_ligne.m_description
-      << ',' << '3' << ',' << "http://www.rtcquebec.ca/Default.aspx?tabid=95&noParcours=" << tmp
-      << ',' << Ligne::categorieToString(p_ligne.m_categorie) << ',' << "FFFFFF" << std::endl;
+    std::string name = Ligne::nameCorres[p_ligne.m_categorie];
+    std::string numero = p_ligne.m_numero.substr(1, p_ligne.m_numero.size() - 2);
+    std::string desc = p_ligne.m_description.substr(1, p_ligne.m_description.size() - 2);
+    f << name << ' ' << numero << " : " << desc << std::endl;
     return f;
 }

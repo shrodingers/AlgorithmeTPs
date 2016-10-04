@@ -22,6 +22,8 @@ class Station;
 class Voyage {
 
 public:
+    static constexpr int routeIdIndex = 0;
+
 	Voyage(const std::vector<std::string>& ligne_gtfs, Ligne* p_ligne);
 	Arret & arretDeLaStation(unsigned int p_num_station);
 	std::vector<Arret> getArrets() const;
