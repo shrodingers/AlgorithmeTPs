@@ -1,6 +1,7 @@
 #include "Enonce/station.h"
 
-Station::Station(const std::vector<std::string>& ligne_gtfs) :	m_id(stoi(ligne_gtfs.at(0))),
+Station::Station(const std::vector<std::string>& ligne_gtfs) :
+																m_id(stoi(ligne_gtfs.at(0))),
 																m_nom(ligne_gtfs.at(1)),
 																m_description(ligne_gtfs.at(2)),
 																m_coords(Coordonnees(stod(ligne_gtfs.at(3)), stod(ligne_gtfs.at(4))))
@@ -38,10 +39,10 @@ std::vector<Ligne*> Station::getLignesPassantes() const
 	std::vector<Ligne*> lignes_passantes;
 	bool is_in_list = false;
 
-	for (auto v : m_voyages_passants)
+	for (auto & v : m_voyages_passants)
 	{
 		is_in_list = false;
-		for (auto l : lignes_passantes)
+		for (auto & l : lignes_passantes)
 			if (v->getLigne()->getId() == l->getId())
 				is_in_list = true;
 		if (is_in_list == false)
