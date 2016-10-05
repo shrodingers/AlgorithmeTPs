@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <map>
 #include <chrono>
+#include <unordered_map>
 #include "Enonce/auxiliaires.h"
 #include "Enonce/arret.h"
 #include "Enonce/ligne.h"
@@ -17,12 +18,12 @@ int main(int argc, char **argv) {
     std::vector< std::vector<std::string> > tripsRtc;
     std::vector< std::vector<std::string> > stopsRtc;
     std::vector< std::vector<std::string> > datesRtc;
-    std::map<std::string, Ligne*> lines;
+    std::unordered_map<std::string, std::pair<Ligne*, std::vector<Voyage*> > > lines;
     std::list<Ligne*> orderedLines;
     std::vector<Station*> stations;
     std::vector<Voyage*> trips;
     std::vector<Arret*> stops;
-    std::map<std::string, std::vector<Arret*> > VoyageStops;
+    std::unordered_map<std::string, std::vector<Arret*> > VoyageStops;
 
     auto now = std::chrono::system_clock::now();
 
@@ -33,26 +34,29 @@ int main(int argc, char **argv) {
     lireFichier("RTC/calendar_dates.txt", datesRtc, ',', true);
 
     for (auto& line : linesRtc) {
-        lines[line[Ligne::routeIdIndex]] = new Ligne(line);
+        lines[line[Ligne::routeIdIndex]].first = new Ligne(line);
     }
     for (auto& line : stationsRtc) {
         stations.push_back(new Station(line));
     }
     for (auto& line : tripsRtc) {
-        trips.push_back(new Voyage(line, lines[line[Voyage::routeIdIndex]]));
+        Voyage* trip = new Voyage(line, lines[line[Voyage::routeIdIndex]].first);
+        trips.push_back(trip);
+        lines[line[Voyage::routeIdIndex]].second.push_back(trip);
     }
     for (auto& line : stopsRtc) {
         Arret* stop = new Arret(line);
         stops.push_back(stop);
         VoyageStops[line[Arret::tripIdIndex]].push_back(stop);
     }
+    for (auto& elem : lines) {
+        elem.second.first->setVoyages(elem.second.second);
+    }
 
     Date today;
-    Heure time(22,47,52);
+    Heure time;
     Heure timePlus = time.add_secondes(3600);
     std::vector<Voyage*> currentTrips;
-
-    std::cout << "loading Done, time : " << time << timePlus << std::endl;
 
     for (auto& trip : trips) {
         std::list<Arret> currentStops;
@@ -65,9 +69,6 @@ int main(int argc, char **argv) {
         if (!finalvec.empty()) trip->setArrets(finalvec);
     }
 
-    auto then = std::chrono::system_clock::now();
-    auto duration = std::chrono::duration<double, std::ratio<1,1> >(then - now);
-    std::cout << "Chargement des données terminé en " << duration.count() << "secondes" << std::endl;
 
     const auto& lexCmp = [] (std::string const& s1, std::string const& s2) {
         const auto& countNumbers = [] (std::string const& str) {
@@ -84,19 +85,19 @@ int main(int argc, char **argv) {
 
     for (auto& elem: lines) {
         if (orderedLines.empty()) {
-            orderedLines.push_back(elem.second);
-            max = &(elem.second->getNumero());
-            min = &(elem.second->getNumero());
-        } else if (min && lexCmp(elem.second->getNumero(), *min)) {
-            orderedLines.push_front(elem.second);
-            min = &(elem.second->getNumero());
-        } else if (max && !lexCmp(elem.second->getNumero(), *max)) {
-            orderedLines.push_back(elem.second);
-            max = &(elem.second->getNumero());
+            orderedLines.push_back(elem.second.first);
+            max = &(elem.second.first->getNumero());
+            min = &(elem.second.first->getNumero());
+        } else if (min && lexCmp(elem.second.first->getNumero(), *min)) {
+            orderedLines.push_front(elem.second.first);
+            min = &(elem.second.first->getNumero());
+        } else if (max && !lexCmp(elem.second.first->getNumero(), *max)) {
+            orderedLines.push_back(elem.second.first);
+            max = &(elem.second.first->getNumero());
         } else {
             for (std::list<Ligne*>::iterator it = orderedLines.begin(); it != orderedLines.end(); ++it) {
-                if (lexCmp(elem.second->getNumero(), (*it)->getNumero())) {
-                    orderedLines.insert(it, elem.second);
+                if (lexCmp(elem.second.first->getNumero(), (*it)->getNumero())) {
+                    orderedLines.insert(it, elem.second.first);
                     break;
                 }
             }
@@ -122,6 +123,10 @@ int main(int argc, char **argv) {
         return t1->getHeureDepart() < t2->getHeureDepart();
     });
 
+    auto then = std::chrono::system_clock::now();
+    auto duration = std::chrono::duration<double, std::ratio<1,1> >(then - now);
+
+    std::cout << "Chargement des données terminé en " << duration.count() << "secondes" << std::endl;
 
     std::ofstream os;
     os.open("resultats.txt", std::ofstream::out | std::ofstream::trunc);

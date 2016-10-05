@@ -60,9 +60,9 @@ std::pair<std::string, std::string> Ligne::getDestinations() const {
     std::string dest1, dest2 = "";
 
     for (auto& trip : m_voyages) {
-        std::string tripDest(/*trip->getDestination()*/"");
-        if (dest1.empty()) dest1 = tripDest;
-        else if (dest2.empty() && tripDest != dest1) dest2 = tripDest;
+        std::string tripDest(trip->getDestination());
+        if (dest1.empty() && dest1 != "null") dest1 = tripDest;
+        else if (dest2.empty() && tripDest != dest1 && dest2 != "null") dest2 = tripDest;
     }
     return std::make_pair(dest1, dest2);
 }
@@ -106,7 +106,7 @@ void Ligne::addVoyage(Voyage *ptr_voyage) {
 std::ostream& operator <<(std::ostream& f, const Ligne& p_ligne) {
     std::string name = Ligne::nameCorres[p_ligne.m_categorie];
     std::string numero = p_ligne.m_numero.substr(1, p_ligne.m_numero.size() - 2);
-    std::string desc = p_ligne.m_description.substr(1, p_ligne.m_description.size() - 2);
-    f << name << ' ' << numero << " : " << desc << std::endl;
+    auto dest = p_ligne.getDestinations();
+    f << name << ' ' << numero << " : " << dest.first << (dest.second != "" ? " - "  : "") << dest.second << std::endl;
     return f;
 }

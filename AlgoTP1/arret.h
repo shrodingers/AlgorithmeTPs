@@ -23,6 +23,8 @@
 class Arret {
 
 public:
+	static constexpr int tripIdIndex = 0;
+
 	Arret(const std::vector<std::string>& ligne_gtfs);
 	const Heure& getHeureArrivee() const;
 	void setHeureArrivee(const Heure& p_heureArrivee);
@@ -41,7 +43,16 @@ public:
 
 
 private:
-	unsigned int m_station_id;
+
+    static constexpr int arrivalTimeIndex = 1;
+    static constexpr int departureTimeIndex = 2;
+    static constexpr int stopIdIndex = 3;
+    static constexpr int stopSequenceIndex = 4;
+    static constexpr int hourIndex  = 0;
+    static constexpr int minuteIndex  = 1;
+    static constexpr int secondIndex  = 2;
+
+    unsigned int m_station_id;
 	Heure m_heure_arrivee;
 	Heure m_heure_depart;
 	unsigned int m_numero_sequence;
