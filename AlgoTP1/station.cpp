@@ -10,7 +10,8 @@ Station::Station(const std::vector<std::string>& ligne_gtfs) :
 
 std::ostream & operator<<(std::ostream & flux, const Station & p_station)
 {
-    flux << p_station.getId() << " - " << p_station.getNom();
+    std::string name = p_station.m_nom.substr(1, p_station.m_nom.size() - 2);
+    flux << p_station.getId() << " - " << name << std::endl;
     return (flux);
 }
 

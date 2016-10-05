@@ -56,8 +56,8 @@ static inline tm& getLocalTime() {
 Date::Date()
 {
     tm local_tm = getLocalTime();
-    m_an = static_cast<unsigned int>(local_tm.tm_year);
-    m_mois = static_cast<unsigned int>(local_tm.tm_mon);
+    m_an = 1900 + static_cast<unsigned int>(local_tm.tm_year);
+    m_mois = static_cast<unsigned int>(local_tm.tm_mon) + 1;
     m_jour = static_cast<unsigned int>(local_tm.tm_mday);
 }
 
@@ -120,9 +120,9 @@ bool Heure::operator<=(const Heure &other) const {
 Heure Heure::add_secondes(unsigned int secs) const {
     Heure newHour(*this);
     newHour.m_sec += secs;
-    newHour.m_min += m_sec / 60;
+    newHour.m_min += newHour.m_sec / 60;
     newHour.m_sec %= 60;
-    newHour.m_heure += m_min / 60;
+    newHour.m_heure += newHour.m_min / 60;
     newHour.m_min %= 60;
     if (newHour.m_heure > 30) newHour.m_heure = 30;
     return  newHour;

@@ -12,19 +12,17 @@
 #include "Enonce/voyage.h"
 
 int main(int argc, char **argv) {
-    if (argc < 3) {
-        return -1;
-    }
-
     std::vector< std::vector<std::string> > linesRtc;
     std::vector< std::vector<std::string> > stationsRtc;
     std::vector< std::vector<std::string> > tripsRtc;
     std::vector< std::vector<std::string> > stopsRtc;
+    std::vector< std::vector<std::string> > datesRtc;
     std::map<std::string, Ligne*> lines;
     std::list<Ligne*> orderedLines;
     std::vector<Station*> stations;
     std::vector<Voyage*> trips;
     std::vector<Arret*> stops;
+    std::map<std::string, std::vector<Arret*> > VoyageStops;
 
     auto now = std::chrono::system_clock::now();
 
@@ -32,18 +30,39 @@ int main(int argc, char **argv) {
     lireFichier("RTC/stops.txt", stationsRtc, ',', true);
     lireFichier("RTC/trips.txt", tripsRtc, ',', true);
     lireFichier("RTC/stop_times.txt", stopsRtc, ',', true);
+    lireFichier("RTC/calendar_dates.txt", datesRtc, ',', true);
 
     for (auto& line : linesRtc) {
         lines[line[Ligne::routeIdIndex]] = new Ligne(line);
     }
-    /*for (auto& line : stationsRtc) {
+    for (auto& line : stationsRtc) {
         stations.push_back(new Station(line));
-    }*/
+    }
     for (auto& line : tripsRtc) {
         trips.push_back(new Voyage(line, lines[line[Voyage::routeIdIndex]]));
     }
     for (auto& line : stopsRtc) {
-        stops.push_back(new Arret(line));
+        Arret* stop = new Arret(line);
+        stops.push_back(stop);
+        VoyageStops[line[Arret::tripIdIndex]].push_back(stop);
+    }
+
+    Date today;
+    Heure time(22,47,52);
+    Heure timePlus = time.add_secondes(3600);
+    std::vector<Voyage*> currentTrips;
+
+    std::cout << "loading Done, time : " << time << timePlus << std::endl;
+
+    for (auto& trip : trips) {
+        std::list<Arret> currentStops;
+        auto& VoyageStopsArray = VoyageStops[trip->getId()];
+        std::for_each(VoyageStopsArray.begin(), VoyageStopsArray.end(), [&trip, &time, &timePlus, &currentStops] (Arret* stop) {
+            currentStops.insert(std::lower_bound(currentStops.begin(), currentStops.end(), *stop), *stop);
+        });
+        std::vector<Arret> finalvec ({ std::make_move_iterator(std::begin(currentStops)),
+                                       std::make_move_iterator(std::end(currentStops)) });
+        if (!finalvec.empty()) trip->setArrets(finalvec);
     }
 
     auto then = std::chrono::system_clock::now();
@@ -82,8 +101,27 @@ int main(int argc, char **argv) {
                 }
             }
         }
-        std::cout << orderedLines.front()->getNumero() << std::endl;
     };
+    std::sort(stations.begin(), stations.end(), [] (Station* st1, Station* st2) {
+        return st1->getId() < st2->getId();
+    });
+
+    std::copy_if(trips.begin(), trips.end(), std::back_inserter(currentTrips), [&time, &timePlus, &datesRtc, &today] (Voyage* elem) {
+        if (elem->getHeureDepart() >= time && elem->getHeureFin() <= timePlus) {
+            for (auto& line : datesRtc) {
+                Date date(StringConverter::fromString<unsigned int>(line[1].substr(0, 4)),
+                          StringConverter::fromString<unsigned int>(line[1].substr(4, 2)),
+                          StringConverter::fromString<unsigned int>(line[1].substr(6)));
+                if (today == date && elem->getServiceId() == line[0]) return true;
+            }
+        }
+        return false;
+    });
+
+    std::sort(currentTrips.begin(), currentTrips.end(), [&lexCmp] (Voyage* t1, Voyage* t2) {
+        return t1->getHeureDepart() < t2->getHeureDepart();
+    });
+
 
     std::ofstream os;
     os.open("resultats.txt", std::ofstream::out | std::ofstream::trunc);
@@ -95,9 +133,11 @@ int main(int argc, char **argv) {
 
     os << "==================" << std::endl << "LIGNES DE LA RTC"
        << std::endl << "COMPTE : " << lines.size() << std::endl << "==================" << std::endl << std::endl;
-    for (auto& elem: orderedLines) {
-        os << *elem;
-    }
-    
+    for (auto& elem: orderedLines) os << *elem;
+    os << "==================" << std::endl << "STATIONS DE LA RTC"
+       << std::endl << "COMPTE : " << lines.size() << std::endl << "==================" << std::endl << std::endl;
+    for (auto& elem: stations) os << *elem;
+    os << "VOYAGES DE LA JOURNEE" << std::endl;
+    for (auto& elem: currentTrips) os << *elem;
     return 0;
 }

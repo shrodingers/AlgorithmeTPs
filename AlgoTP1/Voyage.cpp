@@ -59,18 +59,18 @@ void Voyage::setDestination(const std::string &p_destination) {
     m_destination = p_destination;
 }
 
-void Voyage::setArrets(std::vector<Arret> &resultat) {
+void Voyage::setArrets(std::vector<Arret>& resultat) {
     Heure previous;
 
     m_arrets = resultat;
     std::sort(m_arrets.begin(), m_arrets.end(), [] (Arret a1, Arret a2) { return a1.getNumeroSequence() < a2.getNumeroSequence(); });
-    previous = m_arrets.front().getHeureDepart().add_secondes(60);
-    for (auto& stop : m_arrets) {
-        if (stop.getHeureArrivee() - previous < 60) {
-            stop.setHeureArrivee(stop.getHeureArrivee().add_secondes(30));
-            stop.setHeureDepart(stop.getHeureDepart().add_secondes(30));
+    previous = m_arrets.front().getHeureDepart();
+    for (auto it = m_arrets.begin() + 1; it != m_arrets.end(); ++it) {
+        if ((*it).getHeureDepart() == previous) {
+            (*it).setHeureArrivee((*it).getHeureArrivee().add_secondes(30));
+            (*it).setHeureDepart((*it).getHeureDepart().add_secondes(30));
         }
-        previous = stop.getHeureDepart();
+        previous = (*it).getHeureDepart();
     }
 }
 
@@ -95,7 +95,12 @@ bool Voyage::operator<(const Voyage &p_other) const {
 }
 
 std::ostream& operator<<(std::ostream &flux, const Voyage &p_voyage) {
-    flux << p_voyage.m_ligne->getId() << ',' << p_voyage.m_service_id << ',' << p_voyage.m_id << ',' << p_voyage.m_destination
-        << ',' << "" << ',' << "" << ',' << "" << ',' << "" << ',' << std::endl;
-         return flux;
+    std::string dest = p_voyage.m_destination.substr(1, p_voyage.m_destination.size() - 2);
+    std::string num = p_voyage.m_ligne->getNumero().substr(1, p_voyage.m_ligne->getNumero().size() - 2);
+
+    flux << num << ": Vers " << dest << std::endl;
+    for (auto& stop : p_voyage.m_arrets) {
+        flux << stop;
+    }
+    return flux;
 }
