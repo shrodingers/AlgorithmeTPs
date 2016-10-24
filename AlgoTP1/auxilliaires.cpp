@@ -28,7 +28,6 @@ static inline void trimFirst(std::ifstream& is) {
 void lireFichier(std::string nomFichier, std::vector<std::vector<std::string>>& resultats, char delimiteur, bool rm_entete)
 {
     std::ifstream is;
-    //std::vector< std::vector< std::string > > result;
     std::string buffer;
 
     try {
@@ -80,7 +79,9 @@ bool Date::operator>(const Date &other) const {
 }
 
 std::ostream & operator<<(std::ostream & flux, const Date & p_date) {
-    flux << "Dates printing not implemented yet";
+    flux << p_date.m_an << '-' <<
+         std::setfill('0') << std::setw(2) << p_date.m_mois << '-' <<
+         std::setfill('0') << std::setw(2) <<p_date.m_jour ;
     return flux;
 }
 

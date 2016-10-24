@@ -3,7 +3,7 @@
 //
 
 #include <algorithm>
-#include "Enonce/voyage.h"
+#include "voyage.h"
 
 Voyage::Voyage(const std::vector<std::string> &ligne_gtfs, Ligne *p_ligne)
     try : m_id(ligne_gtfs[tripIdIndex]),

@@ -1,4 +1,4 @@
-#include "Enonce/station.h"
+#include "station.h"
 
 Station::Station(const std::vector<std::string>& ligne_gtfs) :
         m_id(StringConverter::fromString<unsigned int>(ligne_gtfs.at(0))),
