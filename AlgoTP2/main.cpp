@@ -48,10 +48,10 @@ int main() {
     res.ajouterArc(42, 7, 72);
     res.ajouterArc(13, 7, 14);
     res.ajouterArc(23, 19, 32);
-    res.dijkstra(42, 23, result);
+    std::cout << res.dijkstra(42, 23, result) << std::endl;
     res.bellmanFord(42, 23, result2);
-    res.printGraph(os, res.getReverseGraph());
-    //res.print(os, result);
+    //res.printGraph(os, res.getReverseGraph());
+    res.print(os, result);
     res.print(os2, result2);
     res.getComposantesFortementConnexes(compoConnexes);
     res.printConnexes(os3, compoConnexes);

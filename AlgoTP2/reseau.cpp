@@ -6,6 +6,7 @@
 #include <unordered_set>
 #include <list>
 #include <functional>
+#include <numeric>
 #include "reseau.h"
 
 Reseau::Reseau() :
@@ -145,7 +146,9 @@ int Reseau::dijkstra(unsigned int numOrigine, unsigned int numDest, std::vector<
         origin = findMiniumum(tmpGraph, distances);
         if (origin == numDest) {
             findWay();
-            return 0;
+            return std::accumulate(std::next(chemin.begin()), chemin.end(), std::make_pair(0, chemin.begin()), [this] (std::pair<unsigned int, std::vector<unsigned int>::iterator> const& prev, unsigned int const sommet) {
+                return std::make_pair(prev.first + m_sommets[*(prev.second)][sommet].first, std::next(prev.second));
+            }).first;
         } else if (origin == INFINI) {
             throw std::logic_error("Le chemin entre les deux sommets n'existe pas");
         }
@@ -161,7 +164,10 @@ int Reseau::dijkstra(unsigned int numOrigine, unsigned int numDest, std::vector<
         tmpGraph.erase(origin);
     }
     findWay();
-    return 0;
+    //Retrouve le coût total du plus court chemin. Utilise les fonction d'ordre supérieur de la STL pour cela.
+    return std::accumulate(std::next(chemin.begin()), chemin.end(), std::make_pair(0, chemin.begin()), [this] (std::pair<unsigned int, std::vector<unsigned int>::iterator> const& prev, unsigned int const sommet) {
+        return std::make_pair(prev.first + m_sommets[*(prev.second)][sommet].first, std::next(prev.second));
+    }).first;
 }
 
 int Reseau::bellmanFord(unsigned int numOrigine, unsigned int numDest, std::vector<unsigned int> &chemin) throw (std::logic_error) {
@@ -193,7 +199,10 @@ int Reseau::bellmanFord(unsigned int numOrigine, unsigned int numDest, std::vect
     for (unsigned int i = 1; i != m_sommets.size() - 1; ++i) {
         if (!hasChanged) {
             findWay();
-            return 0;
+            //Retrouve le coût total du plus court chemin. Utilise les fonction d'ordre supérieur de la STL pour cela.
+            return std::accumulate(std::next(chemin.begin()), chemin.end(), std::make_pair(0, chemin.begin()), [this] (std::pair<unsigned int, std::vector<unsigned int>::iterator> const& prev, unsigned int const sommet) {
+                return std::make_pair(prev.first + m_sommets[*(prev.second)][sommet].first, std::next(prev.second));
+            }).first;
         }
         hasChanged = false;
         for (auto& sommet: m_sommets) {
@@ -208,7 +217,10 @@ int Reseau::bellmanFord(unsigned int numOrigine, unsigned int numDest, std::vect
         }
     }
     findWay();
-    return 0;
+    //Retrouve le coût total du plus court chemin. Utilise les fonction d'ordre supérieur de la STL pour cela.
+    return std::accumulate(std::next(chemin.begin()), chemin.end(), std::make_pair(0, chemin.begin()), [this] (std::pair<unsigned int, std::vector<unsigned int>::iterator> const& prev, unsigned int const sommet) {
+        return std::make_pair(prev.first + m_sommets[*(prev.second)][sommet].first, std::next(prev.second));
+    }).first;
 }
 
 int Reseau::getComposantesFortementConnexes(std::vector<std::vector<unsigned int> > &composantes) const {
@@ -248,10 +260,19 @@ int Reseau::getComposantesFortementConnexes(std::vector<std::vector<unsigned int
     for (auto& elem: assigned) {
         composantes.push_back(elem.second);
     }
+
+    /* std::accumulate(composantes.begin(), composantes.end(), 0, [] (unsigned int const cout, std::vector<unsigned int> const& elem) {
+        return cout + std::accumulate(elem.begin(), elem.end(), cout, [] (int const cout, unsigned int const sommet))
+    });*/
     return 0;
 }
 
+bool Reseau::estFortementConnexe() const {
+    std::vector<std::vector<unsigned int> > composantes;
 
+    getComposantesFortementConnexes(composantes);
+    return composantes.size() == 1 && composantes[0].size() == m_sommets.size();
+}
 
 liste_sommets Reseau::getReverseGraph() const {
     liste_sommets reversed;
