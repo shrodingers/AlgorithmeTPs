@@ -53,7 +53,7 @@ int main() {
     //res.printGraph(os, res.getReverseGraph());
     res.print(os, result);
     res.print(os2, result2);
-    res.getComposantesFortementConnexes(compoConnexes);
+    std::cout << res.getComposantesFortementConnexes(compoConnexes) << std::endl;
     res.printConnexes(os3, compoConnexes);
     return 0;
 }

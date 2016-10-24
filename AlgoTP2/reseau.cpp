@@ -261,9 +261,20 @@ int Reseau::getComposantesFortementConnexes(std::vector<std::vector<unsigned int
         composantes.push_back(elem.second);
     }
 
-    /* std::accumulate(composantes.begin(), composantes.end(), 0, [] (unsigned int const cout, std::vector<unsigned int> const& elem) {
-        return cout + std::accumulate(elem.begin(), elem.end(), cout, [] (int const cout, unsigned int const sommet))
-    });*/
+    // calcule le coût total de toutes les composante fortement connexes
+    return std::accumulate(composantes.begin(), composantes.end(), 0, [this] (unsigned int const cout, std::vector<unsigned int> const& elem) {
+        // calcule le coût total d'une composante fortement connexe
+        auto total =  std::accumulate(elem.begin(), elem.end(), cout, [this, &elem] (unsigned int const cout_composante, unsigned int const sommet) {
+            // calcule le coût total de tous les arcs liant un sommet de la composante aux autres sommets de la même composante
+            return std::accumulate(elem.begin(), elem.end(), cout_composante, [this, sommet] (unsigned int const cout_arc, unsigned int const sommet_composante) {
+                // ajoute au coût total la valeur de l'arc entre deux sommets de la composante fortement connexe
+                return cout_arc + ((sommet != sommet_composante &&
+                                    m_sommets.at(sommet).find(sommet_composante) != m_sommets.at(sommet).end())
+                                   ? m_sommets.at(sommet).at(sommet_composante).first : 0);
+            });
+        });
+        return total;
+    });
     return 0;
 }
 
