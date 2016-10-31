@@ -32,13 +32,13 @@ class Voyage;
 class Ligne {
 
 private:
-    static constexpr int routeIdIndex = 0;
     static constexpr int routeShortNameIndex = 2;
     static constexpr int routeDescIndex = 4;
     static constexpr int routeColorIndex = 7;
     static constexpr CategorieBus nullCategory = static_cast<CategorieBus>(-1);
     static const std::list<std::function< int(std::string const&) > > CategoryTester;
     static const std::string colorCorresp[];
+    static const std::string nameCorres[];
     unsigned int m_id;
     std::string m_numero;
     std::string m_description;
@@ -46,6 +46,8 @@ private:
     std::vector<Voyage*> m_voyages;
 
 public:
+    static constexpr int routeIdIndex = 0;
+
     Ligne(const std::vector<std::string>& ligne_gtfs);
     static CategorieBus couleurToCategorie(std::string couleur);
     static std::string categorieToString(CategorieBus c);

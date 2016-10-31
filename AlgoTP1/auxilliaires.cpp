@@ -28,7 +28,6 @@ static inline void trimFirst(std::ifstream& is) {
 void lireFichier(std::string nomFichier, std::vector<std::vector<std::string>>& resultats, char delimiteur, bool rm_entete)
 {
     std::ifstream is;
-    //std::vector< std::vector< std::string > > result;
     std::string buffer;
 
     try {
@@ -56,8 +55,8 @@ static inline tm& getLocalTime() {
 Date::Date()
 {
     tm local_tm = getLocalTime();
-    m_an = static_cast<unsigned int>(local_tm.tm_year);
-    m_mois = static_cast<unsigned int>(local_tm.tm_mon);
+    m_an = 1900 + static_cast<unsigned int>(local_tm.tm_year);
+    m_mois = static_cast<unsigned int>(local_tm.tm_mon) + 1;
     m_jour = static_cast<unsigned int>(local_tm.tm_mday);
 }
 
@@ -80,7 +79,9 @@ bool Date::operator>(const Date &other) const {
 }
 
 std::ostream & operator<<(std::ostream & flux, const Date & p_date) {
-    flux << "Dates printing not implemented yet";
+    flux << p_date.m_an << '-' <<
+         std::setfill('0') << std::setw(2) << p_date.m_mois << '-' <<
+         std::setfill('0') << std::setw(2) <<p_date.m_jour ;
     return flux;
 }
 
@@ -120,9 +121,9 @@ bool Heure::operator<=(const Heure &other) const {
 Heure Heure::add_secondes(unsigned int secs) const {
     Heure newHour(*this);
     newHour.m_sec += secs;
-    newHour.m_min += m_sec / 60;
+    newHour.m_min += newHour.m_sec / 60;
     newHour.m_sec %= 60;
-    newHour.m_heure += m_min / 60;
+    newHour.m_heure += newHour.m_min / 60;
     newHour.m_min %= 60;
     if (newHour.m_heure > 30) newHour.m_heure = 30;
     return  newHour;

@@ -2,7 +2,7 @@
 // Created by Leon on 18/09/2016.
 //
 
-#include "Enonce/arret.h"
+#include "arret.h"
 
 Arret::Arret(const std::vector<std::string> &ligne_gtfs)
         :   m_voyage_id(ligne_gtfs[tripIdIndex]),
@@ -76,8 +76,6 @@ bool Arret::operator<(const Arret &p_other) const {
 }
 
 std::ostream & operator<<(std::ostream & flux, const Arret & p_arret) {
-    flux << p_arret.m_voyage_id << ',' << p_arret.m_heure_arrivee
-         << ',' << p_arret.m_heure_depart << ',' << p_arret.m_station_id
-         << ',' << p_arret.m_numero_sequence << ",0,0" << std::endl;
+    flux << p_arret.m_heure_arrivee << " - " << p_arret.m_station_id << std::endl;
     return flux;
 }

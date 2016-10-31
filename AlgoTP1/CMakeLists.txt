@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.4)
 project(AlgoTP1)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -10,6 +10,6 @@ set(SOURCE_FILES
         Enonce/ligne.h
         Enonce/station.h
         Enonce/voyage.h
-    arret.h main.cpp auxilliaires.cpp arret.cpp ligne.cpp Voyage.cpp)
+    arret.h main.cpp auxilliaires.cpp arret.cpp ligne.cpp station.cpp Voyage.cpp coordonnees.cpp)
 
 add_executable(AlgoTP1 ${SOURCE_FILES})

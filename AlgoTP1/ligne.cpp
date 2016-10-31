@@ -3,13 +3,20 @@
 //
 
 #include <algorithm>
-#include "Enonce/ligne.h"
+#include "ligne.h"
 
 const std::list<std::function< int(std::string const&) > > Ligne::CategoryTester = {
         [] (std::string const& str) { return str == "97BF0D" ? CategorieBus::METRO_BUS : nullCategory; },
         [] (std::string const& str) { return str == "013888" ? CategorieBus::LEBUS : nullCategory; },
         [] (std::string const& str) { return str == "E04503" ? CategorieBus::EXPRESS : nullCategory; },
         [] (std::string const& str) { return str == "1A171B" || str == "003888" ? CategorieBus::COUCHE_TARD : nullCategory; }
+};
+
+const std::string Ligne::nameCorres[] = {
+        "METRO_BUS",
+        "LEBUS",
+        "EXPRESS",
+        "COUCHE_TARD"
 };
 
 const std::string Ligne::colorCorresp[]  = {
@@ -53,9 +60,9 @@ std::pair<std::string, std::string> Ligne::getDestinations() const {
     std::string dest1, dest2 = "";
 
     for (auto& trip : m_voyages) {
-        std::string tripDest(/*trip->getDestination()*/"");
-        if (dest1.empty()) dest1 = tripDest;
-        else if (dest2.empty() && tripDest != dest1) dest2 = tripDest;
+        std::string tripDest(trip->getDestination());
+        if (dest1.empty() && dest1 != "null") dest1 = tripDest;
+        else if (dest2.empty() && tripDest != dest1 && dest2 != "null") dest2 = tripDest;
     }
     return std::make_pair(dest1, dest2);
 }
@@ -97,10 +104,9 @@ void Ligne::addVoyage(Voyage *ptr_voyage) {
 }
 
 std::ostream& operator <<(std::ostream& f, const Ligne& p_ligne) {
-    std::string tmp = p_ligne.m_numero;
-    tmp.erase(std::remove(tmp.begin(), tmp.end(), '\"'), tmp.end());
-    f << p_ligne.m_id << ',' << "RTC" << ',' << p_ligne.m_numero << ',' << "" << ',' << p_ligne.m_description
-      << ',' << '3' << ',' << "http://www.rtcquebec.ca/Default.aspx?tabid=95&noParcours=" << tmp
-      << ',' << Ligne::categorieToString(p_ligne.m_categorie) << ',' << "FFFFFF" << std::endl;
+    std::string name = Ligne::nameCorres[p_ligne.m_categorie];
+    std::string numero = p_ligne.m_numero.substr(1, p_ligne.m_numero.size() - 2);
+    auto dest = p_ligne.getDestinations();
+    f << name << ' ' << numero << " : " << dest.first << (dest.second != "" ? " - "  : "") << dest.second << std::endl;
     return f;
 }
