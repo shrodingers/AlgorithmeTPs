@@ -47,6 +47,7 @@ Heure Voyage::getHeureFin() const {
 }
 
 Arret& Voyage::arretDeLaStation(unsigned int p_num_station) {
+    std::cout << m_ligne->getNumero() << std::endl;
     for (auto& stop : m_arrets) {
         if (stop.getStationId() == p_num_station) {
             return stop;

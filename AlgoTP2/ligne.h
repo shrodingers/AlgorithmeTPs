@@ -32,7 +32,6 @@ class Voyage;
 class Ligne {
 
 private:
-    static constexpr int routeShortNameIndex = 2;
     static constexpr int routeDescIndex = 4;
     static constexpr int routeColorIndex = 7;
     static constexpr CategorieBus nullCategory = static_cast<CategorieBus>(-1);
@@ -47,6 +46,7 @@ private:
 
 public:
     static constexpr int routeIdIndex = 0;
+    static constexpr int routeShortNameIndex = 2;
 
     Ligne(const std::vector<std::string>& ligne_gtfs);
     static CategorieBus couleurToCategorie(std::string couleur);

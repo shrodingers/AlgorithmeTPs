@@ -25,7 +25,7 @@ const std::string Ligne::colorCorresp[]  = {
 
 Ligne::Ligne(const std::vector<std::string> &ligne_gtfs)
   try  :   m_id(StringConverter::fromString<unsigned int>(ligne_gtfs[routeIdIndex])),
-        m_numero(ligne_gtfs[routeShortNameIndex]),
+        m_numero(ligne_gtfs[routeShortNameIndex].substr(1, ligne_gtfs[routeShortNameIndex].size() - 2)),
         m_description(ligne_gtfs[routeDescIndex]),
         m_categorie(couleurToCategorie(ligne_gtfs[routeColorIndex]))
 {
@@ -35,7 +35,7 @@ Ligne::Ligne(const std::vector<std::string> &ligne_gtfs)
 }
 
 std::string Ligne::categorieToString(CategorieBus c) {
-    return (c <= CategorieBus::COUCHE_TARD && c >= CategorieBus::METRO_BUS) ? colorCorresp[static_cast<unsigned int>(c)] : "";
+    return (c <= CategorieBus::COUCHE_TARD && c >= CategorieBus::METRO_BUS) ? nameCorres[static_cast<unsigned int>(c)] : "";
 }
 
 CategorieBus Ligne::couleurToCategorie(std::string couleur) {
@@ -105,8 +105,7 @@ void Ligne::addVoyage(Voyage *ptr_voyage) {
 
 std::ostream& operator <<(std::ostream& f, const Ligne& p_ligne) {
     std::string name = Ligne::nameCorres[p_ligne.m_categorie];
-    std::string numero = p_ligne.m_numero.substr(1, p_ligne.m_numero.size() - 2);
     auto dest = p_ligne.getDestinations();
-    f << name << ' ' << numero << " : " << dest.first << (dest.second != "" ? " - "  : "") << dest.second << std::endl;
+    f << name << ' ' << p_ligne.m_numero << " : " << dest.first << (dest.second != "" ? " - "  : "") << dest.second << std::endl;
     return f;
 }

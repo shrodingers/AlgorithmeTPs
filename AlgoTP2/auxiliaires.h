@@ -106,6 +106,8 @@ namespace StringConverter {
 
         ss << str;
         ss >> ret;
+        if (ss.fail())
+            throw std::runtime_error("Bad format");
         return ret;
     }
 

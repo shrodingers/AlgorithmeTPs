@@ -73,9 +73,6 @@ private:
 	void initialiser_reseau(Date date, Heure heure_depart, Heure heure_fin, Coordonnees depart, Coordonnees dest,
 			double dist_de_marche=distance_max_initiale, double dist_transfert=distance_max_transfert);
 
-    void initialiser_reseauAlt(Date date, Heure heure_depart, Heure heure_fin, Coordonnees depart, Coordonnees dest,
-                            double dist_de_marche=distance_max_initiale, double dist_transfert=distance_max_transfert);
-
     struct hashPair {
         size_t operator()(std::pair<std::string, unsigned int>const& pair) const {
             return hash_combine(0, pair.first, pair.second);
@@ -84,6 +81,7 @@ private:
     /** À compléter */
 private:
     std::unordered_map<std::string, std::pair<Ligne*, std::vector<Voyage*> > > m_lignes;
+    std::unordered_map<std::string, Ligne*> m_lignes_name;
     std::unordered_map<unsigned int, Station*> m_stations;
     std::unordered_map<std::string, Voyage*> m_voyages;
     std::vector<Arret*> m_arrets;
