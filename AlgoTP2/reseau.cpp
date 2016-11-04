@@ -157,10 +157,8 @@ int Reseau::dijkstra(unsigned int numOrigine, unsigned int numDest, std::vector<
 
         //Cas particulier qui indique la découverte du plus court chemin
         if (origin == numDest) {
-            std::cout << "Fini à : " << origin << "prematurement" << std::endl;
             return findWay();
         } else if (origin == INFINI) {
-            std::cout << "Abandonné à : " << prev << std::endl;
             throw std::logic_error("Le chemin entre les deux sommets n'existe pas");
         }
         for (auto& elem: tmpGraph[origin]) {

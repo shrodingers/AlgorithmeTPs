@@ -55,7 +55,7 @@ int main() {
             minute = def_min;
         }
         try {
-            std::cout << "secont[defaut=" << def_sec<< "]";
+            std::cout << "second[defaut=" << def_sec<< "]";
             std::getline(std::cin, buff);
             second = StringConverter::fromString<unsigned int>(buff);
         } catch (...) {
@@ -123,10 +123,10 @@ int main() {
         std::vector<Heure> heures;
         try {
             heures = gest->trouver_horaire(date, time, numeroLigne, numeroStation,
-                                                   realLine.getDestinations().first);
+                                           gest->get_bus_destinations(numeroStation, numeroLigne).first);
         } catch (...) {
             heures = gest->trouver_horaire(date, time, numeroLigne, numeroStation,
-                                                   realLine.getDestinations().second);
+                                           gest->get_bus_destinations(numeroStation, numeroLigne).second);
         }
         std::cout << Ligne::categorieToString(realLine.getCategorie()) << " " << realLine.getNumero() << " - " << realLine.getDescription() << std::endl;
         std::cout << realStation.getId() << " - " << realStation.getDescription() << std::endl << std::endl;
@@ -135,27 +135,90 @@ int main() {
         }
     };
 
-    //std::vector<std::vector<unsigned int> > compos;
-    Gestionnaire gest("D:\\work\\AlgorithmeTPs\\AlgoTP1\\RTC");
-    horaires(&gest);
-    /*if (gest.reseau_est_fortement_connexe(Date(), Heure(19, 15, 0), true))
-        std::cout << "connexe" << std::endl;
-    else
-        std::cout << "pas connexe" << std::endl;
-    gest.composantes_fortement_connexes(Date(), Heure(24, 15, 0), compos, true);
-    for (auto& elem: compos) {
-        for (auto& sub: elem) {
-            std::cout << sub << '-';
+    auto itineraire = [&askDate, &askTime] (Gestionnaire* gest) {
+        std::vector<Coordonnees> adresses({
+                Coordonnees(46.760074, -71.319867),
+                Coordonnees(46.778398, -71.26853),
+                Coordonnees(46.785923, -71.354046),
+                Coordonnees(46.776635, -71.270671),
+                Coordonnees(46.857245, -71.206804),
+                Coordonnees(46.778808, -71.270014) });
+        std::string buff;
+        int index;
+        std::cout << "Choisir votre point de départ" << std::endl;
+        std::cout << "Carnets d'adresse" << std::endl;
+        std::cout << "1 - 3475 avenue maricourt, Québec: (46.760074, -71.319867)" << std::endl;
+        std::cout << "2 - 2325 vie étudiante, Québec: (46.778398, -71.26853)" << std::endl;
+        std::cout << "3 - Cineplex odéon sainte-foy: (46.785923, -71.354046)" << std::endl;
+        std::cout << "4 - Pavillon pouliot: (46.776635, -71.270671)" << std::endl;
+        std::cout << "5 - 2476, avenue de lisieux, québec: (46.857245, -71.206804)" << std::endl;
+        std::cout << "6 - Pavillon desjardin: (46.778808, -71.270014)" << std::endl;
+        std::cout << "Sélectionner une adresse en indiquant un chiffre:";
+        std::getline(std::cin, buff);
+        try {
+            index = StringConverter::fromString<int>(buff);
+        } catch (...) {
+            std::cerr << "Enter a valid value" << std::endl;
+            return;
         }
-        std::cout << std::endl;
-    }
-    gest.getReseau().print(os);*/
-    /*auto chemin = gest.plus_court_chemin(Date(2016, 10, 5), Heure(20, 0, 0), Coordonnees(46.778808, -71.270014), Coordonnees(46.760074, -71.319867));
-    for (auto& etape : chemin) {
-        std::cout << etape << " - ";
-        if (gest.station_existe(etape)) std::cout << gest.getStation(etape).getDescription();
-        std::cout << std::endl;
-    }
-    gest.getReseau().print(os);*/
+        if (index < 1 || index > 6) {
+            std::cerr << "Enter a valid value" << std::endl;
+            return;
+        }
+        Coordonnees start = adresses[index - 1];
+        std::cout << "Choisir votre point d'arrivee" << std::endl;
+        std::cout << "Carnets d'adresse" << std::endl;
+        std::cout << "1 - 3475 avenue maricourt, Québec: (46.760074, -71.319867)" << std::endl;
+        std::cout << "2 - 2325 vie étudiante, Québec: (46.778398, -71.26853)" << std::endl;
+        std::cout << "3 - Cineplex odéon sainte-foy: (46.785923, -71.354046)" << std::endl;
+        std::cout << "4 - Pavillon pouliot: (46.776635, -71.270671)" << std::endl;
+        std::cout << "5 - 2476, avenue de lisieux, québec: (46.857245, -71.206804)" << std::endl;
+        std::cout << "6 - Pavillon desjardin: (46.778808, -71.270014)" << std::endl;
+        std::cout << "Sélectionner une adresse en indiquant un chiffre:";
+        std::getline(std::cin, buff);
+        try {
+            index = StringConverter::fromString<int>(buff);
+        } catch (...) {
+            std::cerr << "Enter a valid value" << std::endl;
+            return;
+        }
+        if (index < 1 || index > 6) {
+            std::cerr << "Enter a valid value" << std::endl;
+            return;
+        }
+        Coordonnees end = adresses[index - 1];
+        Date date = askDate();
+        Heure time = askTime(20, 22, 29);
+        std::ofstream os;
+        os.open("reseau2.txt", std::ofstream::out | std::ofstream::trunc);
+        auto chemin = gest->plus_court_chemin(date, time, start, end);
+        gest->getReseau().print(os);
+        for (auto& etape : chemin) {
+            std::cout << etape << " - ";
+            if (gest->station_existe(etape)) std::cout << gest->getStation(etape).getDescription();
+            std::cout << std::endl;
+        }
+    };
+
+    auto connectivite = [&askDate, &askTime] (Gestionnaire* gest) {
+        Date date = askDate();
+        Heure time = askTime(20, 29, 57);
+        if (gest->reseau_est_fortement_connexe(date, time, true)) {
+            std::cout << "Avec les arêtes de transfert, le réseau est fortement connexe." <<std::endl;
+        } else {
+            std::cout << "Avec les arêtes de transfert, le réseau n'est pas fortement connexe." <<std::endl;
+        }
+        if (gest->reseau_est_fortement_connexe(date, time, false)) {
+            std::cout << "Sans les arêtes de transfert, le réseau est fortement connexe." <<std::endl;
+        } else {
+            std::cout << "Sans les arêtes de transfert, le réseau n'est pas fortement connexe." <<std::endl;
+        }
+
+    };
+    Gestionnaire gest("D:\\work\\AlgorithmeTPs\\AlgoTP1\\RTC");
+    proxy(&gest);
+    horaires(&gest);
+    itineraire(&gest);
+    connectivite(&gest);
     return 0;
 }

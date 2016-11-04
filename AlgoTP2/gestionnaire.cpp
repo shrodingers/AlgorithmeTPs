@@ -122,31 +122,23 @@ std::vector<std::pair<double, Station*> > Gestionnaire::trouver_stations_environ
     return ret;
 }
 
-void Gestionnaire::initialiser_reseau(Date date, Heure heure_depart, Heure heure_fin, Coordonnees depart,
+void Gestionnaire::initialiser_reseau_stations(Date date, Heure heure_depart, Heure heure_fin, Coordonnees depart,
                                          Coordonnees dest, double dist_de_marche, double dist_transfert) {
     auto voyages = m_voyages_dates[date];
     std::unordered_map<std::pair<std::string, unsigned int>, unsigned int, hashPair > indexes;
     auto calcTime = [] (Heure hDepart, Heure hArrivee) {
-        if (hArrivee < hDepart)
-            std::cout << hArrivee << " - " << hDepart << std::endl;
         return static_cast<unsigned int>(hArrivee - hDepart);
     };
     auto timeByFeet = [] (double distance) {
-        if (distance > 1)
-            std::cout << distance << std::endl;
-        //std::cout << "feets" << static_cast<unsigned int>(std::round((vitesse_de_marche / distance) * 3600)) << std::endl;
         return static_cast<unsigned int>((distance/vitesse_de_marche) * 3600);
     };
     auto ajouterTrajet = [this] (unsigned int idOrig, unsigned int idDest, unsigned int cout) {
-        /*if (cout == 0)
-            std::cout << "cout nll";*/
         if (idOrig != idDest && !m_reseau.arcExiste(idOrig, idDest)) {
             m_reseau.ajouterArc(idOrig, idDest, cout);
         } else if (m_reseau.arcExiste(idOrig, idDest) && cout < m_reseau.getCoutArc(idOrig, idDest)) {
             m_reseau.majCoutArc(idOrig, idDest, cout);
         }
     };
-    std::cout << "arrets init" << std::endl;
     m_arretsInteret = std::accumulate(voyages.begin(), voyages.end(), std::vector<Arret>(), [&heure_depart, &heure_fin, &indexes] (std::vector<Arret>& prev, Voyage* elem) {
         unsigned int count = 0;
         for (auto& stop : elem->getArrets()) {
@@ -174,14 +166,11 @@ void Gestionnaire::initialiser_reseau(Date date, Heure heure_depart, Heure heure
                 if (coord - dest < dist_de_marche) {
                     ajouterTrajet(origin, num_dest, timeByFeet(coord - dest));
                 }
-                auto getIndex = [&indexes] (Arret const& arr) {
-                    return indexes[std::make_pair(arr.getVoyageId(), arr.getStationId())] + 2;
-                };
                 for (auto const& stop : m_arretsInteret) {
                     auto distance = coord - m_stations[stop.getStationId()]->getCoords();
                     if (!nextFound && currentArret && currentArret->getVoyageId() == stop.getVoyageId() && currentArret->getNumeroSequence() < stop.getNumeroSequence()) {
-                        ajouterTrajet(origin, getIndex(stop), calcTime(dpt_hour, stop.getHeureArrivee()));
-                        trouverEnvirons(getIndex(stop), m_stations[stop.getStationId()]->getCoords(), stop.getHeureArrivee(), dist_transfert, &stop);
+                        ajouterTrajet(origin, stop.getStationId(), calcTime(dpt_hour, stop.getHeureArrivee()));
+                        trouverEnvirons(stop.getStationId(), m_stations[stop.getStationId()]->getCoords(), stop.getHeureArrivee(), dist_transfert, &stop);
                         nextFound = true;
                     } else if (distance < max_dist && stop.getHeureDepart() > dpt_hour.add_secondes(timeByFeet(distance))) {
                         if (goodStops.count(stop.getStationId()) == 0 || goodStops[stop.getStationId()]->getHeureDepart() > stop.getHeureDepart()) {
@@ -192,12 +181,82 @@ void Gestionnaire::initialiser_reseau(Date date, Heure heure_depart, Heure heure
                 for (auto& elem: goodStops) {
                     Station* to = m_stations[elem.second->getStationId()];
 
-                    ajouterTrajet(origin, getIndex(*elem.second), calcTime(dpt_hour, elem.second->getHeureDepart()));
+                    ajouterTrajet(origin, elem.second->getStationId(), calcTime(dpt_hour, elem.second->getHeureDepart()));
+                    trouverEnvirons(elem.second->getStationId(), to->getCoords(), elem.second->getHeureArrivee(), dist_transfert, elem.second);
+                }
+            };
+    std::sort(m_arretsInteret.begin(), m_arretsInteret.end(), [] (Arret const& a1, Arret const& a2) {
+        return a1.getNumeroSequence() < a2.getNumeroSequence();
+    });
+    m_reseau = Reseau();
+    m_reseau.ajouterSommet(num_depart);
+    m_reseau.ajouterSommet(num_dest);
+    trouverEnvirons(num_depart, depart, heure_depart, dist_de_marche, nullptr);
+}
+
+void Gestionnaire::initialiser_reseau(Date date, Heure heure_depart, Heure heure_fin, Coordonnees depart,
+                                         Coordonnees dest, double dist_de_marche, double dist_transfert) {
+    auto voyages = m_voyages_dates[date];
+    std::unordered_map<std::pair<std::string, unsigned int>, unsigned int, hashPair > indexes;
+    auto calcTime = [] (Heure hDepart, Heure hArrivee) {
+        return static_cast<unsigned int>(hArrivee - hDepart);
+    };
+    auto timeByFeet = [] (double distance) {
+        return static_cast<unsigned int>((distance/vitesse_de_marche) * 3600);
+    };
+    auto ajouterTrajet = [this] (unsigned int idOrig, unsigned int idDest, unsigned int cout, MoyenDeplacement type = MoyenDeplacement::BUS) {
+        if (idOrig != idDest && !m_reseau.arcExiste(idOrig, idDest)) {
+            m_reseau.ajouterArc(idOrig, idDest, cout, static_cast<unsigned int>(type));
+        }
+    };
+    m_arretsInteret = std::accumulate(voyages.begin(), voyages.end(), std::vector<Arret>(), [&heure_depart, &heure_fin, &indexes] (std::vector<Arret>& prev, Voyage* elem) {
+        for (auto& stop : elem->getArrets()) {
+            if (stop.getHeureArrivee() >= heure_depart && stop.getHeureArrivee() <= heure_fin) {
+                prev.push_back(stop);
+            }
+        }
+        return prev;
+    });
+
+    std::unordered_set<std::pair<std::string, unsigned int>,  hashPair > resolved;
+    std::function<void(unsigned int, Coordonnees, Heure, double, const Arret*)> trouverEnvirons =
+            [this, &indexes, &resolved, &dest, &dist_de_marche, &dist_transfert, &calcTime, &ajouterTrajet, &timeByFeet, &trouverEnvirons]
+                    (unsigned int origin, Coordonnees coord, Heure dpt_hour, double max_dist, const Arret* currentArret) {
+                std::unordered_map<unsigned int, const Arret*> goodStops;
+                bool nextFound = false;
+                if (currentArret) {
+                    if (!resolved.count(std::make_pair(currentArret->getVoyageId(), currentArret->getStationId()))) {
+                        resolved.emplace(currentArret->getVoyageId(), currentArret->getStationId());
+                    } else {
+                        return;
+                    }}
+                if (!m_reseau.sommetExiste(origin)) m_reseau.ajouterSommet(origin);
+                if (coord - dest < dist_de_marche) {
+                    ajouterTrajet(origin, num_dest, timeByFeet(coord - dest), MoyenDeplacement::PIEDS);
+                }
+                auto getIndex = [&indexes] (Arret const& arr) {
+                    return indexes[std::make_pair(arr.getVoyageId(), arr.getStationId())] + 2;
+                };
+                for (auto const& stop : m_arretsInteret) {
+                    auto distance = coord - m_stations[stop.getStationId()]->getCoords();
+                    if (!nextFound && currentArret && currentArret->getVoyageId() == stop.getVoyageId() && currentArret->getNumeroSequence() < stop.getNumeroSequence()) {
+                        ajouterTrajet(origin, getIndex(stop), calcTime(dpt_hour, stop.getHeureArrivee()), MoyenDeplacement::BUS);
+                        trouverEnvirons(getIndex(stop), m_stations[stop.getStationId()]->getCoords(), stop.getHeureArrivee(), dist_transfert, &stop);
+                        nextFound = true;
+                    } else if (distance < max_dist && stop.getHeureDepart() > dpt_hour.add_secondes(timeByFeet(distance))) {
+                        if (goodStops.count(getIndex(stop)) == 0 || goodStops[getIndex(stop)]->getHeureDepart() > stop.getHeureDepart()) {
+                            goodStops[getIndex(stop)] = &stop;
+                        }
+                    }
+                }
+                for (auto& elem: goodStops) {
+                    Station* to = m_stations[elem.second->getStationId()];
+
+                    ajouterTrajet(origin, getIndex(*elem.second), calcTime(dpt_hour, elem.second->getHeureDepart()), MoyenDeplacement::PIEDS);
                     trouverEnvirons(getIndex(*elem.second), to->getCoords(), elem.second->getHeureArrivee(), dist_transfert, elem.second);
                 }
             };
 
-    std::cout << "arrets sort" << std::endl;
     std::sort(m_arretsInteret.begin(), m_arretsInteret.end(), [] (Arret const& a1, Arret const& a2) {
         return a1.getNumeroSequence() < a2.getNumeroSequence();
     });
@@ -205,7 +264,6 @@ void Gestionnaire::initialiser_reseau(Date date, Heure heure_depart, Heure heure
     for (auto& stop : m_arretsInteret) {
         indexes[std::make_pair(stop.getVoyageId(), stop.getStationId())] = count++;
     }
-    std::cout << "Construction" << std::endl;
     m_reseau = Reseau();
     m_reseau.ajouterSommet(num_depart);
     m_reseau.ajouterSommet(num_dest);
@@ -233,14 +291,14 @@ std::vector<Heure> Gestionnaire::trouver_horaire(Date date, Heure heure, std::st
 
 
 bool Gestionnaire::reseau_est_fortement_connexe(Date date, Heure heure_debut, bool considerer_transfert) {
-    initialiser_reseau(date, heure_debut, Heure(25, 0, 0), Coordonnees(0, 0), Coordonnees(0, 0), 0, considerer_transfert ? distance_max_transfert : 0);
+    initialiser_reseau_stations(date, heure_debut, Heure(25, 0, 0), Coordonnees(0, 0), Coordonnees(0, 0), 0, considerer_transfert ? distance_max_transfert : 0);
     return m_reseau.estFortementConnexe();
 }
 
 void Gestionnaire::composantes_fortement_connexes(Date date, Heure heure_debut,
                                                   std::vector<std::vector<unsigned int> > &composantes,
                                                   bool considerer_transfert) {
-    initialiser_reseau(date, heure_debut, Heure(25, 0, 0), Coordonnees(0, 0), Coordonnees(0, 0), 0, considerer_transfert ? distance_max_transfert : 0);
+    initialiser_reseau_stations(date, heure_debut, Heure(25, 0, 0), Coordonnees(0, 0), Coordonnees(0, 0), 0, considerer_transfert ? distance_max_transfert : 0);
     m_reseau.getComposantesFortementConnexes(composantes);
 }
 
@@ -255,10 +313,17 @@ std::vector< unsigned int > Gestionnaire::plus_court_chemin(Date date, Heure heu
     } catch (std::logic_error const& err) {
         return std::vector<unsigned int>();
     }
-    std::transform(chemin.begin(), chemin.end(), chemin.begin(), [this] (unsigned int sommet) {
-      if (sommet < 2) {
-          return sommet;
+    unsigned int tmp = 0;
+    std::transform(chemin.begin(), chemin.end(), chemin.begin(), [this, &tmp] (unsigned int sommet) {
+      /*if (tmp) {
+          std::cout << "cout : " << m_reseau.getCoutArc(tmp, sommet) << "type : " << m_reseau.getTypeArc(tmp, sommet) << std::endl;
+      }*/
+        if (sommet < 2) {
+            //tmp = sommet;
+            return sommet;
       } else {
+          /*std::cout << "index : " << sommet << " station : " << m_arretsInteret[sommet - 2].getStationId() << "ligne : " << m_voyages[m_arretsInteret[sommet - 2].getVoyageId()]->getLigne()->getNumero() << std::endl;
+          tmp = sommet;*/
           return m_arretsInteret[sommet - 2].getStationId();
       }
     });

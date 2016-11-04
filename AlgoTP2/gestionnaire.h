@@ -69,9 +69,22 @@ public:
 
 private:
 	Reseau m_reseau;
-
+    /*!
+     * \brief Fonction qui initialise le réseau pour un sommet par arrêt, pouvant ainsi
+     * rendre compte du plus court chemin entre différents arrêts, nécessaire pour le calcul d'un itinéraire,
+     * car le cout du trajet entre deux stations dépends de ses arrêts et est dynamique.
+     */
 	void initialiser_reseau(Date date, Heure heure_depart, Heure heure_fin, Coordonnees depart, Coordonnees dest,
 			double dist_de_marche=distance_max_initiale, double dist_transfert=distance_max_transfert);
+
+    /*!
+     *
+     * \brief Fonction qui initialise le réseau avec une station par arrêt, utilisé pour la connextivité, il est plus statique
+     * et représente uniquement les connexions entre stations. Cette fonction calcule tout de même la valeur des arcs,
+     * en prenant le plus petit temps possible
+     */
+    void initialiser_reseau_stations(Date date, Heure heure_depart, Heure heure_fin, Coordonnees depart, Coordonnees dest,
+                            double dist_de_marche=distance_max_initiale, double dist_transfert=distance_max_transfert);
 
     struct hashPair {
         size_t operator()(std::pair<std::string, unsigned int>const& pair) const {
