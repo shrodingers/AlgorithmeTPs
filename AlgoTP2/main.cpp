@@ -4,17 +4,19 @@
 
 #include <fstream>
 #include "reseau.h"
+#include "gestionnaire.h"
 
 int main() {
-    Reseau res;
+    /*Reseau res;*/
     std::ofstream os;
-    std::ofstream os2;
+    /*std::ofstream os2;
     std::ofstream os3;
     std::vector<unsigned int> result;
     std::vector<unsigned int> result2;
-    std::vector<std::vector<unsigned int> > compoConnexes;
+    std::vector<std::vector<unsigned int> > compoConnexes;*/
 
-    os.open("dijkstra.dot", std::ofstream::out | std::ofstream::trunc);
+    os.open("reseau2.dot", std::ofstream::out | std::ofstream::trunc);
+    /*
     os2.open("bellman.dot", std::ofstream::out | std::ofstream::trunc);
     os3.open("connexes.dot", std::ofstream::out | std::ofstream::trunc);
     res.ajouterSommet(1);
@@ -54,6 +56,27 @@ int main() {
     res.print(os, result);
     res.print(os2, result2);
     std::cout << res.getComposantesFortementConnexes(compoConnexes) << std::endl;
-    res.printConnexes(os3, compoConnexes);
+    res.printConnexes(os3, compoConnexes);*/
+    std::vector<std::vector<unsigned int> > compos;
+    Gestionnaire gest("D:\\work\\AlgorithmeTPs\\AlgoTP1\\RTC");
+    /*if (gest.reseau_est_fortement_connexe(Date(), Heure(19, 15, 0), true))
+        std::cout << "connexe" << std::endl;
+    else
+        std::cout << "pas connexe" << std::endl;
+    gest.composantes_fortement_connexes(Date(), Heure(24, 15, 0), compos, true);
+    for (auto& elem: compos) {
+        for (auto& sub: elem) {
+            std::cout << sub << '-';
+        }
+        std::cout << std::endl;
+    }
+    gest.getReseau().print(os);*/
+    auto chemin = gest.plus_court_chemin(Date(2016, 10, 5), Heure(20, 0, 0), Coordonnees(46.778808, -71.270014), Coordonnees(46.760074, -71.319867));
+    for (auto& etape : chemin) {
+        std::cout << etape << " - ";
+        if (gest.station_existe(etape)) std::cout << gest.getStation(etape).getDescription();
+        std::cout << std::endl;
+    }
+    gest.getReseau().print(os);
     return 0;
 }

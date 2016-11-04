@@ -58,16 +58,17 @@ public:
 				throw (std::logic_error);
 	bool estFortementConnexe() const;
 	int getComposantesFortementConnexes(std::vector<std::vector<unsigned int> > & composantes) const;
-    liste_sommets getReverseGraph() const;
+
 
     ///DEBUG METHOD
-    void print(std::ostream &os);
-    void print(std::ostream &os, std::vector<unsigned int> const&);
-    void printConnexes(std::ostream &os, std::vector<std::vector<unsigned int> > const&);
+    void print(std::ostream &os) const;
+    void print(std::ostream &os, std::vector<unsigned int> const&) const;
+    void printConnexes(std::ostream &os, std::vector<std::vector<unsigned int> > const&) const;
     static void printGraph(std::ostream &os, liste_sommets const& graph);
 private:
     void printGraph(liste_sommets const& graph, std::unordered_map<unsigned int, unsigned int>& distances);
     unsigned int findMiniumum(liste_sommets const& graph, std::unordered_map<unsigned int, unsigned int>& distances);
+	liste_sommets getReverseGraph() const;
 
 private:
     liste_sommets m_sommets;

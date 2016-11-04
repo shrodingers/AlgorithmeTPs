@@ -149,22 +149,25 @@ int Reseau::dijkstra(unsigned int numOrigine, unsigned int numDest, std::vector<
     for (auto& elem: tmpGraph) {
         distances[elem.first] = INFINI;
     }
-
+    int prev = 0;
     distances[numOrigine] = 0;
     while (!tmpGraph.empty()) {
+        prev = origin;
         origin = findMiniumum(tmpGraph, distances);
 
         //Cas particulier qui indique la découverte du plus court chemin
         if (origin == numDest) {
+            std::cout << "Fini à : " << origin << "prematurement" << std::endl;
             return findWay();
         } else if (origin == INFINI) {
+            std::cout << "Abandonné à : " << prev << std::endl;
             throw std::logic_error("Le chemin entre les deux sommets n'existe pas");
         }
         for (auto& elem: tmpGraph[origin]) {
             unsigned int poids;
 
             poids = tmpGraph[origin][elem.first].first;
-            if (distances[elem.first] > distances[origin] + poids) {
+            if (distances[origin] + poids < distances[elem.first]) {
                 distances[elem.first] = distances[origin] + poids;
                 predecesseurs[elem.first] = origin;
             }
@@ -327,7 +330,7 @@ void Reseau::printGraph(std::ostream &os, liste_sommets const &graph) {
 }
 
 // sérialise le graphe d'un réseau
-void Reseau::print(std::ostream &os) {
+void Reseau::print(std::ostream &os) const {
     os << "digraph myGraph {" << std::endl;
     for (auto& sommet: m_sommets) {
         for (auto& arc: sommet.second) {
@@ -339,7 +342,7 @@ void Reseau::print(std::ostream &os) {
 
 
 //sérialise le graphe d'un réseau et colorise le chemin des noeuds en rouge
-void Reseau::print(std::ostream &os, std::vector<unsigned int> const &chemin) {
+void Reseau::print(std::ostream &os, std::vector<unsigned int> const &chemin) const {
     os << "digraph myGraph {" << std::endl;
     for (auto& sommet: m_sommets) {
         for (auto& arc: sommet.second) {
@@ -359,7 +362,7 @@ void Reseau::print(std::ostream &os, std::vector<unsigned int> const &chemin) {
 }
 
 //sérialise le graphe d'un réseau et colorise les arcs des composantes fortement connexes en bleu
-void Reseau::printConnexes(std::ostream &os, std::vector<std::vector<unsigned int> > const &compo) {
+void Reseau::printConnexes(std::ostream &os, std::vector<std::vector<unsigned int> > const &compo) const {
     os << "digraph myGraph {" << std::endl;
     for (auto& sommet: m_sommets) {
         for (auto& arc: sommet.second) {
