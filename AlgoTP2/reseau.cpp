@@ -33,9 +33,9 @@ void Reseau::enleverSommet(unsigned int numero) throw (std::logic_error) {
 }
 
 void Reseau::ajouterArc(unsigned int numOrigine, unsigned int numDest, unsigned int cout, unsigned int type) throw (std::logic_error) {
-    m_nbr_arcs += 1;
     try {
         m_sommets.at(numOrigine)[numDest] = std::make_pair(cout, type);
+        m_nbr_arcs += 1;
     } catch (...) {
         throw std::logic_error("Erreur lors de l'ajout d'un arc");
     }
@@ -314,8 +314,9 @@ liste_sommets Reseau::getReverseGraph() const {
     return reversed;
 }
 
-//Les fonctions suivantes en print* son utilisées pour sérialiser un graphe au format dot dans un fichier et ainsi pouvoir en avoir un rendu graphique
-
+/// Les fonctions suivantes en print* son utilisées pour sérialiser un graphe au format dot dans un fichier et ainsi pouvoir en avoir un rendu graphique
+/// Elles sont commentées pour ne pas modifier l'interface publique
+/*
 //Sérialise un graphe
 void Reseau::printGraph(std::ostream &os, liste_sommets const &graph) {
     os << "digraph myGraph {" << std::endl;
@@ -376,3 +377,4 @@ void Reseau::printConnexes(std::ostream &os, std::vector<std::vector<unsigned in
     }
     os << "}";
 }
+*/

@@ -60,13 +60,6 @@ public:
 
 	std::vector< unsigned int > plus_court_chemin(Date date, Heure heure_depart, Coordonnees depart, Coordonnees destination);
 
-    /*
-     * test
-     */
-
-    void init();
-    Reseau const& getReseau();
-
 private:
 	Reseau m_reseau;
     /*!
@@ -86,12 +79,14 @@ private:
     void initialiser_reseau_stations(Date date, Heure heure_depart, Heure heure_fin, Coordonnees depart, Coordonnees dest,
                             double dist_de_marche=distance_max_initiale, double dist_transfert=distance_max_transfert);
 
+    /*!
+     * \brief Foncteur pour hasher une paire en tant que clé, nécessaire pour utiliser un arret en clé de hash map
+     */
     struct hashPair {
         size_t operator()(std::pair<std::string, unsigned int>const& pair) const {
             return hash_combine(0, pair.first, pair.second);
         }
     };
-    /** À compléter */
 private:
     std::unordered_map<std::string, std::pair<Ligne*, std::vector<Voyage*> > > m_lignes;
     std::unordered_map<std::string, Ligne*> m_lignes_name;

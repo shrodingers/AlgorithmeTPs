@@ -13,21 +13,21 @@ int main() {
         std::string buff;
         std::cout << "Entrez la date qui vous intéresse!" << std::endl;
         try {
-            std::cout << "annee[defaut=2016]";
+            std::cout << "annee[defaut=2016]:";
             std::getline(std::cin, buff);
             year = StringConverter::fromString<unsigned int>(buff);
         } catch (...) {
             year = 2016;
         }
         try {
-            std::cout << "mois[defaut=10]";
+            std::cout << "mois[defaut=10]:";
             std::getline(std::cin, buff);
             month = StringConverter::fromString<unsigned int>(buff);
         } catch (...) {
             month = 10;
         }
         try {
-            std::cout << "jour[defaut=5]";
+            std::cout << "jour[defaut=5]:";
             std::getline(std::cin, buff);
             day = StringConverter::fromString<unsigned int>(buff);
         } catch (...) {
@@ -41,21 +41,21 @@ int main() {
         std::string buff;
         std::cout << "Entrez le début de l'horaire !" << std::endl;
         try {
-            std::cout << "heure[defaut=" << def_hours << "]";
+            std::cout << "heure[defaut=" << def_hours << "]:";
             std::getline(std::cin, buff);
             hour = StringConverter::fromString<unsigned int>(buff);
         } catch (...) {
             hour = def_hours;
         }
         try {
-            std::cout << "minute[defaut=" << def_min << "]";
+            std::cout << "minute[defaut=" << def_min << "]:";
             std::getline(std::cin, buff);
             minute = StringConverter::fromString<unsigned int>(buff);
         } catch (...) {
             minute = def_min;
         }
         try {
-            std::cout << "second[defaut=" << def_sec<< "]";
+            std::cout << "second[defaut=" << def_sec<< "]:";
             std::getline(std::cin, buff);
             second = StringConverter::fromString<unsigned int>(buff);
         } catch (...) {
@@ -89,7 +89,7 @@ int main() {
         auto res = gest->trouver_stations_environnantes(Coordonnees(lat, longitude), rayon);
         for (auto& elem : res) {
            std::cout << "À une distance de " << elem.first << "km" << std::endl;
-            std::cout << elem.second->getId() << elem.second->getDescription() << std::endl;
+            std::cout << elem.second->getId() << " - " << elem.second->getDescription() << std::endl;
         }
     };
     auto horaires = [&askDate, &askTime] (Gestionnaire* gest) {
@@ -189,10 +189,7 @@ int main() {
         Coordonnees end = adresses[index - 1];
         Date date = askDate();
         Heure time = askTime(20, 22, 29);
-        std::ofstream os;
-        os.open("reseau2.txt", std::ofstream::out | std::ofstream::trunc);
         auto chemin = gest->plus_court_chemin(date, time, start, end);
-        gest->getReseau().print(os);
         for (auto& etape : chemin) {
             std::cout << etape << " - ";
             if (gest->station_existe(etape)) std::cout << gest->getStation(etape).getDescription();
@@ -215,10 +212,23 @@ int main() {
         }
 
     };
+
     Gestionnaire gest("D:\\work\\AlgorithmeTPs\\AlgoTP1\\RTC");
-    proxy(&gest);
-    horaires(&gest);
-    itineraire(&gest);
-    connectivite(&gest);
-    return 0;
+    options["1"] = std::make_pair("Stations à proximité", proxy);
+    options["2"] = std::make_pair("Consulter horaires du bus", horaires);
+    options["3"] = std::make_pair("Itinéraire", itineraire);
+    options["4"] = std::make_pair("Stats de connectivité", connectivite);
+    std::string input;
+    while (42) {
+        std::cout << "Menu" << std::endl;
+        std::cout << "1 - " << options["1"].first << std::endl;
+        std::cout << "2 - " << options["2"].first << std::endl;
+        std::cout << "3 - " << options["3"].first << std::endl;
+        std::cout << "4 - " << options["4"].first << std::endl;
+        std::cout << "Sélectionner une option en indiquant un chiffre ou autre chose pour quitter: ";
+        std::getline(std::cin, input);
+        if (!options.count(input))
+            return 0;
+        options[input].second(&gest);
+    }
 }
