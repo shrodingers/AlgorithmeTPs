@@ -60,16 +60,41 @@ public:
 
 	std::vector< unsigned int > plus_court_chemin(Date date, Heure heure_depart, Coordonnees depart, Coordonnees destination);
 
-
 private:
 	Reseau m_reseau;
-
+    /*!
+     * \brief Fonction qui initialise le réseau pour un sommet par arrêt, pouvant ainsi
+     * rendre compte du plus court chemin entre différents arrêts, nécessaire pour le calcul d'un itinéraire,
+     * car le cout du trajet entre deux stations dépends de ses arrêts et est dynamique.
+     */
 	void initialiser_reseau(Date date, Heure heure_depart, Heure heure_fin, Coordonnees depart, Coordonnees dest,
 			double dist_de_marche=distance_max_initiale, double dist_transfert=distance_max_transfert);
 
-	/** À compléter */
+    /*!
+     *
+     * \brief Fonction qui initialise le réseau avec une station par arrêt, utilisé pour la connextivité, il est plus statique
+     * et représente uniquement les connexions entre stations. Cette fonction calcule tout de même la valeur des arcs,
+     * en prenant le plus petit temps possible
+     */
+    void initialiser_reseau_stations(Date date, Heure heure_depart, Heure heure_fin, Coordonnees depart, Coordonnees dest,
+                            double dist_de_marche=distance_max_initiale, double dist_transfert=distance_max_transfert);
 
-
+    /*!
+     * \brief Foncteur pour hasher une paire en tant que clé, nécessaire pour utiliser un arret en clé de hash map
+     */
+    struct hashPair {
+        size_t operator()(std::pair<std::string, unsigned int>const& pair) const {
+            return hash_combine(0, pair.first, pair.second);
+        }
+    };
+private:
+    std::unordered_map<std::string, std::pair<Ligne*, std::vector<Voyage*> > > m_lignes;
+    std::unordered_map<std::string, Ligne*> m_lignes_name;
+    std::unordered_map<unsigned int, Station*> m_stations;
+    std::unordered_map<std::string, Voyage*> m_voyages;
+    std::vector<Arret*> m_arrets;
+    std::unordered_map<Date, std::vector<Voyage*>, Date::hash> m_voyages_dates;
+    std::vector<Arret> m_arretsInteret;
 
 };
 
